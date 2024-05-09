@@ -9,6 +9,8 @@ exports.deleteOne = (Model) =>
     if (!doc) {
       return next(new AppError("Document with this id not found", 404));
     }
+
+
     res.status(204).json({
       status: "success",
       data: null,
@@ -35,6 +37,7 @@ exports.updateOne = (Model) =>
 
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
+    console.log(req.body)
     const doc = await Model.create(req.body);
      doc.__v = undefined;
 

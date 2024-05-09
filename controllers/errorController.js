@@ -1,4 +1,6 @@
-const AppError = require('../utils/appError');
+const AppError = require("../utils/appError");
+const cloudinary = require("../utils/cloudinary");
+
 const handlCastErrorsDB = (err) => {
   let message = `invalid ${err.path} : ${err.value}`;
   return new AppError(message, 400);
@@ -19,7 +21,7 @@ const handleDupliaceValuesDB = (err) => {
 
 const handleValidationError = (err) => {
   const messages = Object.values(err.errors).map((err) => err.message);
-  const message = `Invalid Input data.  ${messages.join('. ')}`;
+  const message = `Invalid Input data.  ${messages.join(". ")}`;
   return new AppError(message, 400);
 };
 const sendErrorProd = (res, err) => {
@@ -31,28 +33,29 @@ const sendErrorProd = (res, err) => {
     });
   } else {
     //programming errors or external unexpected errors ,not operational
-    console.error('ERROR  ' + err);
+    console.error("ERROR  " + err);
     res.status(500).json({
-      message: 'something went very wrong',
+      message: "something went very wrong",
     });
   }
 };
 
-module.exports = (err, req, res, next) => {
+module.exports = async (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
+  err.status = err.status || "error";
+  if (req.file) {
+    const publicId = req.file.filename;
+    await cloudinary.uploader.destroy(publicId);
+  }
 
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.NODE_ENV === "production") {
     let error = err;
 
-    if (error.name === 'CastError') error = handlCastErrorsDB(error);
+    if (error.name === "CastError") error = handlCastErrorsDB(error);
     if (error.code == 11000) error = handleDupliaceValuesDB(error);
-    if (error.name === 'ValidationError')
-      error = handleValidationError(error);
+    if (error.name === "ValidationError") error = handleValidationError(error);
     sendErrorProd(res, error);
-  } else if (process.env.NODE_ENV === 'development') {
-    console.error('err')
+  } else if (process.env.NODE_ENV === "development") {
     sendErrorDev(res, err);
   }
 };
-

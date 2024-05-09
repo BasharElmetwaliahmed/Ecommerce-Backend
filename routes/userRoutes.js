@@ -5,7 +5,6 @@ const router = express.Router();
 router.post("/signup", signUp);
 router.post("/login", login);
 router.get("/login",(req,res)=>{
-    console.log("hasa")
     res.send('succes')
 })
 

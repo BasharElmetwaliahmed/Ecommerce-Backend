@@ -4,15 +4,19 @@ const {
   getAllCategories,
   createCategory,
   deleteCategory,
+  uploadCategoryImageController,
   getCategory,
+  updateCategory,
+  setImageBody,
 } = require("../controllers/categoryController");
 
 router
   .route("/")
   .get(getAllCategories)
-  .post(createCategory)
+  .post(uploadCategoryImageController, setImageBody, createCategory);
 
   router.route('/:id').
+  patch(uploadCategoryImageController,setImageBody,updateCategory).
   get(getCategory).
   delete(deleteCategory);
 
